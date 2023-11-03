@@ -107,7 +107,7 @@ func NewConfigFromPath(path string) (*Config, error) {
 // persistent flag.
 func LoadConfig() (*Config, error) {
 	// Get the configuration file path from the persistent flag.
-	path, err := rootCmd.PersistentFlags().GetString("config")
+	path, err := GetConfigPath()
 	if err != nil {
 		return nil, err
 	}

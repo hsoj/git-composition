@@ -51,14 +51,12 @@ func authorAdd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	author := NewAuthor(args[0], args[1], args[2])
-	if c.Authors.Find(author.Id) != nil {
-		return fmt.Errorf("author with id %s already exists", author.Id)
+	// Add the author to the configuration and write the configuration file if
+	// the author does not already exist.
+	if err = c.Authors.Add(args[0], args[1], args[2]); err != nil {
+		return err
 	}
-	c.Authors = append(c.Authors, author)
-	// Write the configuration file.
-	err = c.Write()
-	if err != nil {
+	if err = c.Write(); err != nil {
 		return err
 	}
 	return nil
@@ -69,6 +67,11 @@ func authorList(cmd *cobra.Command, args []string) error {
 	c, err := LoadConfig()
 	if err != nil {
 		return err
+	}
+	// If no authors exist, print a message and return.
+	if len(c.Authors) == 0 {
+		fmt.Println("no authors")
+		return nil
 	}
 	// Print the authors.
 	for _, a := range c.Authors {
@@ -99,6 +102,25 @@ func (a *Author) String() string {
 
 // Authors is a list of authors.
 type Authors []*Author
+
+// Add adds an author to the list of authors if none of the authors have the
+// same id, name, or email.
+func (a *Authors) Add(id, name, email string) error {
+	author := NewAuthor(id, name, email)
+	for _, a := range *a {
+		if a.Id == author.Id {
+			return fmt.Errorf("author with id %s already exists", author.Id)
+		}
+		if a.Name == author.Name {
+			return fmt.Errorf("author with name %s already exists", author.Name)
+		}
+		if a.Email == author.Email {
+			return fmt.Errorf("author with email %s already exists", author.Email)
+		}
+	}
+	*a = append(*a, author)
+	return nil
+}
 
 // Find finds an author by id.
 func (as Authors) Find(id string) *Author {
