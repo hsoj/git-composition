@@ -4,6 +4,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 
@@ -21,17 +22,85 @@ var (
 			cmd.Help()
 		},
 	}
+	configDisplayCmd = &cobra.Command{
+		Use:   "display",
+		Short: "Display configuration.",
+		Long:  "Display configuration.",
+		RunE:  configDisplay,
+	}
+	configSetCmd = &cobra.Command{
+		Use:   "set [key] [value]",
+		Short: "Set configuration.",
+		Long: `Set configuration.
+
+	Valid keys:
+		issue_tracker
+		template
+
+	Example:
+		git-comp config set issue_tracker "Jira"
+		`,
+		RunE: configSet,
+	}
 	defaultTemplate = `{{.Type}}({{.Scope}}): {{.Subject}}
 
-	{{.Body}}
-  
-	{{.IssueTracker}}: {{.Issue}}
-	{{.CoAuthors}}
-	{{.Footer}}`
+{{.Body}}
+
+{{.IssueTracker}}: {{.Issue}}
+{{.CoAuthors}}
+{{.Footer}}`
 )
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+	configCmd.AddCommand(configDisplayCmd)
+	configCmd.AddCommand(configSetCmd)
+}
+
+// configDisplay displays the configuration in YAML format.
+func configDisplay(cmd *cobra.Command, args []string) error {
+	// Load the configuration.
+	c, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+	// Marshal the configuration.
+	buf, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	// Log the marshalled configuration.
+	log.Printf("configuration:\n---\n%s", string(buf))
+	return nil
+}
+
+// configSet sets the certain configuration values.
+func configSet(cmd *cobra.Command, args []string) error {
+	// Check that the expected number of arguments were provided.
+	var ErrInvalidArgs = errors.New("invalid arguments")
+
+	if len(args) != 2 {
+		return ErrInvalidArgs
+	}
+	// Load the configuration.
+	c, err := LoadConfig()
+	if err != nil {
+		return err
+	}
+	// Set the configuration values.
+	switch args[0] {
+	case "issue_tracker":
+		c.IssueTracker = args[1]
+	case "template":
+		c.Template = args[1]
+	default:
+		return ErrInvalidArgs
+	}
+	// Write the configuration file.
+	if err = c.Write(); err != nil {
+		return err
+	}
+	return nil
 }
 
 type Config struct {
@@ -122,7 +191,7 @@ func (c *Config) Write() error {
 		return err
 	}
 	// Log the marshalled configuration.
-	log.Printf("writing configuration to path <%s>: %s", c.path, string(buf))
+	log.Printf("writing configuration to path: %s", c.path)
 	// Write the configuration file.
 	err = os.WriteFile(c.path, buf, 0644)
 	if err != nil {
