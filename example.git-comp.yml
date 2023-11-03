@@ -1,0 +1,14 @@
+authors:
+- id: jd
+  name: John Doe
+  email: john.doe@email.com
+issue_tracker: Jira
+template: |
+  {{.Type}}({{.Scope}}): {{.Subject}}
+
+  {{.Body}}
+
+  {{.IssueTracker}}: {{.Issue}}
+  {{.CoAuthors}}
+  {{.Footer}}
+version: 0.0.0
