@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	configCmd = &cobra.Command{
+	configName = ".git-comp.yaml"
+	configCmd  = &cobra.Command{
 		Use:   "config",
 		Short: "Manage configuration.",
 		Long:  "Manage configuration.",
@@ -20,6 +21,13 @@ var (
 			cmd.Help()
 		},
 	}
+	defaultTemplate = `{{.Type}}({{.Scope}}): {{.Subject}}
+
+	{{.Body}}
+  
+	{{.IssueTracker}}: {{.Issue}}
+	{{.CoAuthors}}
+	{{.Footer}}`
 )
 
 func init() {
@@ -39,8 +47,46 @@ type Config struct {
 	Version string `yaml:"version"`
 }
 
-// NewConfig creates a new configuration.
-func NewConfig(path string) (*Config, error) {
+// GetConfigPath returns the configuration file path from the persistent flag
+// or the default configuration file path from the home directory.
+func GetConfigPath() (string, error) {
+	// Get the configuration file path from the persistent flag.
+	path, err := rootCmd.PersistentFlags().GetString("config")
+	if err != nil {
+		return "", err
+	}
+	// Check if the configuration file path is empty.
+	if path == "" {
+		// Get the home directory.
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		// Set the configuration file path to the default configuration file path.
+		path = home + "/" + configName
+	}
+	return path, nil
+}
+
+// NewConfig creates a new configuration with default values.
+func NewConfig() (*Config, error) {
+	// Get the configuration file path.
+	path, err := GetConfigPath()
+	if err != nil {
+		return nil, err
+	}
+	config := &Config{
+		path:         path,
+		Authors:      make(Authors, 0),
+		IssueTracker: "",
+		Template:     defaultTemplate,
+		Version:      Version,
+	}
+	return config, nil
+}
+
+// NewConfigFromPath creates a new configuration.
+func NewConfigFromPath(path string) (*Config, error) {
 	c := &Config{
 		path: path,
 	}
@@ -65,7 +111,7 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewConfig(path)
+	return NewConfigFromPath(path)
 }
 
 // Write writes the configuration to the configuration file.
@@ -76,7 +122,7 @@ func (c *Config) Write() error {
 		return err
 	}
 	// Log the marshalled configuration.
-	log.Printf("marshalled configuration: %s", string(buf))
+	log.Printf("writing configuration to path <%s>: %s", c.path, string(buf))
 	// Write the configuration file.
 	err = os.WriteFile(c.path, buf, 0644)
 	if err != nil {

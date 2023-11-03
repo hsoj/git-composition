@@ -19,7 +19,7 @@ var (
 
 func init() {
 	// Persistent flag for configuration file path.
-	rootCmd.PersistentFlags().StringP("config", "c", "~/.git-comp.yaml", "configuration file path")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "configuration file path")
 }
 
 func main() {
