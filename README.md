@@ -5,6 +5,9 @@ will automatically compose commit messages for you.
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
+This project is mostly just to fill a niche gap while using GitHub CoPilot to
+develop write all of the code with minor suggestions if any.
+
 ## Installation
 `git-comp` is a Go program, so you can install it with `go get`:
 
@@ -22,7 +25,7 @@ git comp init
 
 This will create a `.git-comp.yaml` file in your home directory.  This file
 contains the configuration for `git-comp`.  You can edit this file to change
-the configuration or use the `git comp config` command to change the 
+the configuration or use the `git comp config` command to change the
 configuration.
 
 Once `git-comp` is initialized, you can use it to compose commit messages.  To
@@ -55,7 +58,7 @@ template: |
   {{.Coauthors}}
   {{.Footer}}
 # The default commit message type.
-type: feat
+type: fix
 # The default commit message scope.
 scope: ""
 # List of known authors.
