@@ -12,9 +12,16 @@
 
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"errors"
+	"os"
+
+	"github.com/spf13/cobra"
+)
 
 var (
+	// path to the git hook.
+	gitHookPath = ".git/hooks/commit-msg"
 	// Init command for git-comp.
 	initCmd = &cobra.Command{
 		Use:   "init [flags]",
@@ -37,6 +44,23 @@ func initCmdRun(cmd *cobra.Command, args []string) error {
 	// Write the configuration file.
 	if err = config.Write(); err != nil {
 		return err
+	}
+	// Check that the git hook does not already exist.
+	if err = checkGitHook(); err != nil {
+		// Remove the configuration file if the git hook already exists.
+		if err = os.Remove(configName); err != nil {
+			return err
+		}
+		return err
+	}
+	return nil
+}
+
+// checkGitHook checks if the git hook exists.
+func checkGitHook() error {
+	// Check that the git hook does not already exist.
+	if _, err := os.Stat(gitHookPath); !os.IsNotExist(err) {
+		return errors.New("git hook for commit messages already exists")
 	}
 	return nil
 }
