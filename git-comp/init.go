@@ -21,7 +21,7 @@ import (
 
 var (
 	// path to the git hook.
-	gitHookPath = ".git/hooks/commit-msg"
+	gitHookPath = ".git/hooks/prepare-commit-msg"
 	// Init command for git-comp.
 	initCmd = &cobra.Command{
 		Use:   "init [flags]",
@@ -63,4 +63,13 @@ func checkGitHook() error {
 		return errors.New("git hook for commit messages already exists")
 	}
 	return nil
+}
+
+// getGitHookPath returns the path to the git hook if it exists.
+func getGitHookPath() (string, error) {
+	// Check that the git hook exists.
+	if _, err := os.Stat(gitHookPath); os.IsNotExist(err) {
+		return "", errors.New("git hook for commit messages does not exist")
+	}
+	return gitHookPath, nil
 }

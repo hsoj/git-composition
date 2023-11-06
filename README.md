@@ -1,9 +1,13 @@
 # git-composition
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hsoj/git-composition)](https://goreportcard.com/report/github.com/hsoj/git-composition)
+[![Go Reference](https://pkg.go.dev/badge/github.com/hsoj/git-composition.svg)](https://pkg.go.dev/github.com/hsoj/git-composition)
+[![GitHub](https://img.shields.io/github/license/hsoj/git-composition)](LICENSE)
+
+
 `git-composition` is a tool for simplifying composition of standardized git
 commit messages.  It is intended to be used with a git commit-msg hook which
 will automatically compose commit messages for you.
-
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
 This project is mostly just to fill a niche gap while using GitHub CoPilot to
 develop write all of the code with minor suggestions if any.
